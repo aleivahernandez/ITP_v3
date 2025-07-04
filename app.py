@@ -39,6 +39,7 @@ datos_filtros = {
 # --- Carga de Datos ---
 @st.cache_data
 def cargar_datos(filepath):
+    """Carga los datos desde un archivo Excel."""
     try:
         return pd.read_excel(filepath)
     except FileNotFoundError:
@@ -47,58 +48,85 @@ def cargar_datos(filepath):
 
 df = cargar_datos("datos.xlsx")
 
+# Detiene la ejecución si el archivo no se pudo cargar.
+if df is None:
+    st.stop()
+
+# --- CSS Personalizado para el Header ---
+st.markdown("""
+<style>
+    /* Contenedor principal del header */
+    .header-container {
+        background-color: #0f69b4;
+        padding: 2rem 2rem 1rem 2rem; /* Acolchado: arriba, derecha, abajo, izquierda */
+        border-radius: 10px;
+        margin-bottom: 2rem; /* Espacio debajo del header */
+    }
+    /* Estilo para el título dentro del header */
+    .header-container h1 {
+        color: white;
+    }
+    /* Estilo para las etiquetas de los filtros */
+    .header-container .stSelectbox label {
+        color: white !important;
+        font-weight: bold;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
 # --- Header y Filtros ---
+# Usamos un markdown para abrir un div y aplicarle nuestra clase CSS
+st.markdown('<div class="header-container">', unsafe_allow_html=True)
+
 st.title("Brújula Tecnológica Territorial")
 
-# --- SECCIÓN DE DIAGNÓSTICO ---
-# Mostramos los nombres de las columnas leídas del Excel si el DataFrame se cargó.
-if df is not None:
-    st.info("Diagnóstico: Nombres de columnas leídos desde 'datos.xlsx'")
-    st.write(df.columns.tolist())
-else:
-    st.stop() # Detiene la ejecución si el archivo no se pudo cargar.
-# --------------------------------
-
+# Creamos columnas para distribuir los filtros y el botón horizontalmente.
 col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
 
 with col1:
     regiones = list(datos_filtros.keys())
-    region_seleccionada = st.selectbox("Región", regiones)
+    region_seleccionada = st.selectbox("Región", regiones, label_visibility="visible")
 
 with col2:
     rubros = list(datos_filtros[region_seleccionada].keys())
-    rubro_seleccionado = st.selectbox("Rubro", rubros)
+    rubro_seleccionado = st.selectbox("Rubro", rubros, label_visibility="visible")
 
 with col3:
     necesidades = datos_filtros[region_seleccionada][rubro_seleccionado]
     if necesidades:
-        necesidad_seleccionada = st.selectbox("Necesidad", necesidades)
+        necesidad_seleccionada = st.selectbox("Necesidad", necesidades, label_visibility="visible")
     else:
-        necesidad_seleccionada = st.selectbox("Necesidad", ["No aplica"], disabled=True)
+        necesidad_seleccionada = st.selectbox("Necesidad", ["No aplica"], disabled=True, label_visibility="visible")
 
 with col4:
-    st.write("")
-    st.write("")
+    st.write("") # Espaciador para alinear verticalmente
+    st.write("") # Espaciador para alinear verticalmente
     buscar = st.button("Buscar", use_container_width=True)
 
+# Cerramos el div del header
+st.markdown('</div>', unsafe_allow_html=True)
 
-# --- Lógica de Búsqueda y Visualización ---
+
+# --- Lógica de Búsqueda y Visualización de Resultados ---
 if buscar:
     try:
         # Filtrado inicial por región y rubro.
         resultados = df[(df['Región'] == region_seleccionada) & (df['Rubro'] == rubro_seleccionado)]
 
+        # Si hay necesidades y se seleccionó una, se aplica el filtro adicional.
         if necesidades and necesidad_seleccionada != "No aplica":
             resultados = resultados[resultados['Necesidad'] == necesidad_seleccionada]
 
-        st.markdown("---") 
+        st.markdown("---")
 
         if not resultados.empty:
             st.subheader(f"Resultados de la búsqueda: {len(resultados)} patentes encontradas")
 
+            # Iteramos sobre cada fila del DataFrame de resultados para mostrar las tarjetas.
             for index, row in resultados.iterrows():
-                st.markdown("---")
-                col_img, col_info = st.columns([1, 4])
+                st.markdown("---") # Separador para cada tarjeta
+                col_img, col_info = st.columns([1, 4]) # Proporción 20% para imagen, 80% para info
 
                 with col_img:
                     ruta_imagen = os.path.join('images', f"{row['Publication Number']}.png")
@@ -117,4 +145,4 @@ if buscar:
             st.warning("No se encontraron resultados para los filtros seleccionados.")
             
     except KeyError as e:
-        st.error(f"Error de columna: No se pudo encontrar la columna {e} en el archivo Excel. Por favor, revisa que los nombres de las columnas en 'datos.xlsx' coincidan con los esperados.")
+        st.error(f"Error de columna: No se pudo encontrar la columna {e}. Revisa que los nombres en 'datos.xlsx' sean correctos.")
