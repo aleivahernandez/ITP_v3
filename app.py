@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 import os
+from streamlit_extras.stylable_container import stylable_container
 
 # --- Configuración de la Página ---
 st.set_page_config(
@@ -48,43 +49,37 @@ def cargar_datos(filepath):
 
 df = cargar_datos("datos.xlsx")
 
-# Detiene la ejecución si el archivo no se pudo cargar.
 if df is None:
     st.stop()
 
-# --- CSS Personalizado ---
-# Este CSS apunta al primer contenedor de la página, que usaremos para el header.
-st.markdown("""
-<style>
-    /* Selecciona el primer contenedor de la página */
-    div[data-testid="stContainer"]:first-of-type {
-        background-color: #0f69b4;
-        border-radius: 10px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    /* Cambia el color del texto del título y las etiquetas de los filtros a blanco */
-    div[data-testid="stContainer"]:first-of-type h1,
-    div[data-testid="stContainer"]:first-of-type .stSelectbox label {
-        color: white;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # --- Header y Filtros ---
-# Agrupamos todos los elementos del header en este contenedor.
-with st.container():
+# Usamos un "contenedor estilizable" para asegurar que el CSS se aplique correctamente.
+with stylable_container(
+    key="header_container",
+    css_styles="""
+        {
+            background-color: #0f69b4;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        h1 { /* Estilo para el título */
+            color: white;
+        }
+        .stSelectbox label { /* Estilo para las etiquetas de los filtros */
+            color: white !important;
+        }
+        """,
+):
     st.title("Brújula Tecnológica Territorial")
 
     col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
 
     with col1:
-        regiones = list(datos_filtros.keys())
-        region_seleccionada = st.selectbox("Región", regiones)
+        region_seleccionada = st.selectbox("Región", list(datos_filtros.keys()))
 
     with col2:
-        rubros = list(datos_filtros[region_seleccionada].keys())
-        rubro_seleccionado = st.selectbox("Rubro", rubros)
+        rubro_seleccionado = st.selectbox("Rubro", list(datos_filtros[region_seleccionada].keys()))
 
     with col3:
         necesidades = datos_filtros[region_seleccionada][rubro_seleccionado]
@@ -112,7 +107,6 @@ if 'buscar' in locals() and buscar:
         if not resultados.empty:
             st.subheader(f"Resultados de la búsqueda: {len(resultados)} patentes encontradas")
 
-            # Muestra de resultados en tarjetas
             for index, row in resultados.iterrows():
                 st.markdown("---")
                 col_img, col_info = st.columns([1, 4])
@@ -132,6 +126,6 @@ if 'buscar' in locals() and buscar:
                     st.info("**Estado en Chile:** Dominio Público en Chile")
         else:
             st.warning("No se encontraron resultados para los filtros seleccionados.")
-            
+
     except KeyError as e:
-        st.error(f"Error de columna: No se pudo encontrar la columna {e}. Revisa que los nombres en 'datos.xlsx' sean correctos.")
+        st.error(f"Error de columna: No se pudo encontrar la columna {e}. Revisa 'datos.xlsx'.")
