@@ -65,6 +65,22 @@ with stylable_container(
         h1, .stSelectbox label {
             color: white;
         }
+        /* Estilo para el botón Buscar */
+        .stButton button {
+            background-color: #eb3c46;
+            color: white;
+            border-radius: 5px;
+            border: none;
+        }
+        .stButton button:hover {
+            background-color: #d4363f; /* Un poco más oscuro al pasar el mouse */
+            color: white;
+            border: none;
+        }
+        .stButton button:disabled {
+            background-color: #cccccc;
+            color: #666666;
+        }
         """,
 ):
     st.title("Brújula Tecnológica Territorial")
@@ -107,7 +123,7 @@ with stylable_container(
 
 
 # --- Lógica de Búsqueda y Visualización ---
-if buscar:
+if 'buscar' in locals() and buscar:
     try:
         # Filtrado de datos
         resultados = df[(df['Región'] == region_seleccionada) & (df['Rubro'] == rubro_seleccionado)]
