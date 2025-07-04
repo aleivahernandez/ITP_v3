@@ -158,9 +158,11 @@ if 'buscar' in locals() and buscar:
                     with col_img:
                         ruta_imagen = os.path.join('images', f"{row['Publication Number']}.png")
                         if os.path.exists(ruta_imagen):
-                            st.image(Image.open(ruta_imagen), use_column_width=True)
+                            # --- LÍNEA MODIFICADA ---
+                            st.image(Image.open(ruta_imagen), use_container_width=True)
                         else:
-                            st.image(os.path.join('images', 'no image.png'), use_column_width=True)
+                            # --- LÍNEA MODIFICADA ---
+                            st.image(os.path.join('images', 'no image.png'), use_container_width=True)
 
                     with col_info:
                         st.markdown(f"**{row['Title (Original language)']}**")
