@@ -52,69 +52,58 @@ df = cargar_datos("datos.xlsx")
 if df is None:
     st.stop()
 
-# --- CSS Personalizado para el Header ---
+# --- CSS Personalizado ---
+# Este CSS apunta al primer contenedor de la página, que usaremos para el header.
 st.markdown("""
 <style>
-    /* Contenedor principal del header */
-    .header-container {
+    /* Selecciona el primer contenedor de la página */
+    div[data-testid="stContainer"]:first-of-type {
         background-color: #0f69b4;
-        padding: 2rem 2rem 1rem 2rem; /* Acolchado: arriba, derecha, abajo, izquierda */
         border-radius: 10px;
-        margin-bottom: 2rem; /* Espacio debajo del header */
+        padding: 2rem;
+        margin-bottom: 2rem;
     }
-    /* Estilo para el título dentro del header */
-    .header-container h1 {
+    /* Cambia el color del texto del título y las etiquetas de los filtros a blanco */
+    div[data-testid="stContainer"]:first-of-type h1,
+    div[data-testid="stContainer"]:first-of-type .stSelectbox label {
         color: white;
-    }
-    /* Estilo para las etiquetas de los filtros */
-    .header-container .stSelectbox label {
-        color: white !important;
-        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
 
-
 # --- Header y Filtros ---
-# Usamos un markdown para abrir un div y aplicarle nuestra clase CSS
-st.markdown('<div class="header-container">', unsafe_allow_html=True)
+# Agrupamos todos los elementos del header en este contenedor.
+with st.container():
+    st.title("Brújula Tecnológica Territorial")
 
-st.title("Brújula Tecnológica Territorial")
+    col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
 
-# Creamos columnas para distribuir los filtros y el botón horizontalmente.
-col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
+    with col1:
+        regiones = list(datos_filtros.keys())
+        region_seleccionada = st.selectbox("Región", regiones)
 
-with col1:
-    regiones = list(datos_filtros.keys())
-    region_seleccionada = st.selectbox("Región", regiones, label_visibility="visible")
+    with col2:
+        rubros = list(datos_filtros[region_seleccionada].keys())
+        rubro_seleccionado = st.selectbox("Rubro", rubros)
 
-with col2:
-    rubros = list(datos_filtros[region_seleccionada].keys())
-    rubro_seleccionado = st.selectbox("Rubro", rubros, label_visibility="visible")
+    with col3:
+        necesidades = datos_filtros[region_seleccionada][rubro_seleccionado]
+        if necesidades:
+            necesidad_seleccionada = st.selectbox("Necesidad", necesidades)
+        else:
+            necesidad_seleccionada = st.selectbox("Necesidad", ["No aplica"], disabled=True)
 
-with col3:
-    necesidades = datos_filtros[region_seleccionada][rubro_seleccionado]
-    if necesidades:
-        necesidad_seleccionada = st.selectbox("Necesidad", necesidades, label_visibility="visible")
-    else:
-        necesidad_seleccionada = st.selectbox("Necesidad", ["No aplica"], disabled=True, label_visibility="visible")
-
-with col4:
-    st.write("") # Espaciador para alinear verticalmente
-    st.write("") # Espaciador para alinear verticalmente
-    buscar = st.button("Buscar", use_container_width=True)
-
-# Cerramos el div del header
-st.markdown('</div>', unsafe_allow_html=True)
+    with col4:
+        st.write("")
+        st.write("")
+        buscar = st.button("Buscar", use_container_width=True)
 
 
 # --- Lógica de Búsqueda y Visualización de Resultados ---
-if buscar:
+if 'buscar' in locals() and buscar:
     try:
-        # Filtrado inicial por región y rubro.
+        # Filtrado de datos
         resultados = df[(df['Región'] == region_seleccionada) & (df['Rubro'] == rubro_seleccionado)]
-
-        # Si hay necesidades y se seleccionó una, se aplica el filtro adicional.
         if necesidades and necesidad_seleccionada != "No aplica":
             resultados = resultados[resultados['Necesidad'] == necesidad_seleccionada]
 
@@ -123,10 +112,10 @@ if buscar:
         if not resultados.empty:
             st.subheader(f"Resultados de la búsqueda: {len(resultados)} patentes encontradas")
 
-            # Iteramos sobre cada fila del DataFrame de resultados para mostrar las tarjetas.
+            # Muestra de resultados en tarjetas
             for index, row in resultados.iterrows():
-                st.markdown("---") # Separador para cada tarjeta
-                col_img, col_info = st.columns([1, 4]) # Proporción 20% para imagen, 80% para info
+                st.markdown("---")
+                col_img, col_info = st.columns([1, 4])
 
                 with col_img:
                     ruta_imagen = os.path.join('images', f"{row['Publication Number']}.png")
