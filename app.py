@@ -43,6 +43,7 @@ datos_filtros = {
 def cargar_datos(filepath):
     """Carga los datos desde un archivo Excel."""
     try:
+        # Asegúrate de que el archivo 'datos.xlsx' esté en la raíz de tu repositorio
         return pd.read_excel(filepath)
     except FileNotFoundError:
         st.error(f"Error: No se encontró el archivo '{filepath}'. Asegúrate de que el archivo está en el repositorio de GitHub.")
@@ -103,16 +104,18 @@ if buscar:
             col_img, col_info = st.columns([1, 4]) # Proporción 20% para la imagen, 80% para la info
 
             with col_img:
-                nombre_imagen = f"{row['Publication Number']}.png"
+                # La ruta a la imagen debe incluir la carpeta 'images'
+                ruta_imagen = os.path.join('images', f"{row['Publication Number']}.png")
                 # Verificamos si la imagen existe antes de intentar mostrarla.
-                if os.path.exists(nombre_imagen):
-                    imagen = Image.open(nombre_imagen)
+                if os.path.exists(ruta_imagen):
+                    imagen = Image.open(ruta_imagen)
                     st.image(imagen, use_column_width=True)
                 else:
-                    st.warning(f"No se encontró la imagen: {nombre_imagen}")
+                    st.warning(f"No se encontró: {ruta_imagen}")
 
             with col_info:
-                st.markdown(f"**{row['Title (Original language)'] midwifery}**")
+                # LÍNEA CORREGIDA:
+                st.markdown(f"**{row['Title (Original language)']}**")
                 st.write(f"**Solicitante:** {row['Assignee - DWPI']}")
                 st.write(f"**País:** {row['Publication Country Code']}")
                 st.info("**Estado en Chile:** Dominio Público en Chile") # Usamos st.info para destacar.
