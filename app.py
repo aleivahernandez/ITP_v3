@@ -73,7 +73,7 @@ with stylable_container(
             border: none;
         }
         .stButton button:hover {
-            background-color: #d4363f; /* Un poco más oscuro al pasar el mouse */
+            background-color: #d4363f;
             color: white;
             border: none;
         }
@@ -86,17 +86,15 @@ with stylable_container(
     st.title("Brújula Tecnológica Territorial")
 
     col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
-    
-    # --- FILTROS CON PLACEHOLDERS ---
+
     placeholder_region = "Seleccione una Región..."
     placeholder_rubro = "Seleccione un Rubro..."
-    
+
     with col1:
         regiones = [placeholder_region] + list(datos_filtros.keys())
         region_seleccionada = st.selectbox("Región", regiones)
 
     with col2:
-        # El filtro de rubro depende de la región seleccionada
         if region_seleccionada != placeholder_region:
             rubros = [placeholder_rubro] + list(datos_filtros[region_seleccionada].keys())
             rubro_seleccionado = st.selectbox("Rubro", rubros)
@@ -104,7 +102,6 @@ with stylable_container(
             rubro_seleccionado = st.selectbox("Rubro", [placeholder_rubro], disabled=True)
 
     with col3:
-        # El filtro de necesidad depende de la región y el rubro
         if region_seleccionada != placeholder_region and rubro_seleccionado != placeholder_rubro:
             necesidades = datos_filtros[region_seleccionada].get(rubro_seleccionado, [])
             if necesidades:
@@ -117,7 +114,6 @@ with stylable_container(
     with col4:
         st.write("")
         st.write("")
-        # El botón de búsqueda se deshabilita si no se ha seleccionado región y rubro
         disable_search = region_seleccionada == placeholder_region or rubro_seleccionado == placeholder_rubro
         buscar = st.button("Buscar", use_container_width=True, disabled=disable_search)
 
@@ -125,19 +121,26 @@ with stylable_container(
 # --- Lógica de Búsqueda y Visualización ---
 if 'buscar' in locals() and buscar:
     try:
-        # Filtrado de datos
+        # 1. Filtrado inicial de datos
         resultados = df[(df['Región'] == region_seleccionada) & (df['Rubro'] == rubro_seleccionado)]
         
-        # Filtro adicional por necesidad si se seleccionó una específica
         if 'necesidad_seleccionada' in locals() and necesidad_seleccionada not in ["Todas", "No aplica"]:
             resultados = resultados[resultados['Necesidad'] == necesidad_seleccionada]
+
+        # 2. Lógica para ordenar por disponibilidad de imagen
+        if not resultados.empty:
+            # Se crea una columna temporal para saber si la imagen existe
+            resultados['tiene_imagen'] = resultados['Publication Number'].apply(
+                lambda pub_num: os.path.exists(os.path.join('images', f"{pub_num}.png"))
+            )
+            # Se ordena por esa columna (True primero) y luego se elimina
+            resultados = resultados.sort_values(by='tiene_imagen', ascending=False).drop(columns=['tiene_imagen'])
 
         st.markdown("---")
 
         if not resultados.empty:
             st.subheader(f"Resultados de la búsqueda: {len(resultados)} patentes encontradas")
 
-            # --- TARJETAS DE RESULTADOS CON BORDES ---
             for index, row in resultados.iterrows():
                 with stylable_container(
                     key=f"card_{row['Publication Number']}",
@@ -157,8 +160,7 @@ if 'buscar' in locals() and buscar:
                         if os.path.exists(ruta_imagen):
                             st.image(Image.open(ruta_imagen), use_column_width=True)
                         else:
-                            # Muestra un placeholder si no hay imagen
-                            st.image("https://via.placeholder.com/150?text=No+Imagen", use_column_width=True)
+                            st.image(os.path.join('images', 'no image.png'), use_column_width=True)
 
                     with col_info:
                         st.markdown(f"**{row['Title (Original language)']}**")
