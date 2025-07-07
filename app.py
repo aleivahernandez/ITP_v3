@@ -62,20 +62,20 @@ with stylable_container(
             padding: 2rem;
             margin-bottom: 2rem;
         }
-        /* Color del título y etiquetas de filtros */
+        /* FORZAR color del título y etiquetas a blanco */
         h1, .stSelectbox label {
-            color: white;
+            color: white !important;
         }
-        /* Estilo para el botón Buscar */
+        /* FORZAR estilo para el botón Buscar */
         .stButton button {
             background-color: #eb3c46;
-            color: white; /* Color del texto del botón */
+            color: white !important; /* <-- Cambio aquí */
             border-radius: 5px;
             border: none;
         }
         .stButton button:hover {
             background-color: #d4363f;
-            color: white;
+            color: white !important; /* <-- Cambio aquí */
             border: none;
         }
         .stButton button:disabled {
