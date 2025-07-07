@@ -15,7 +15,7 @@ st.markdown("""
 <style>
     /* Aplica un borde al contenedor principal de la aplicación */
     .stApp {
-        border: 5px solid #0f69b4; /* Grosor y color del borde */
+        border: 2px solid #0f69b4; /* <-- CAMBIO AQUÍ: borde más delgado */
         border-radius: 15px; /* Bordes redondeados */
         padding: 1rem; /* Espacio entre el borde y el contenido */
     }
