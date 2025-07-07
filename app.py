@@ -62,20 +62,20 @@ with stylable_container(
             padding: 2rem;
             margin-bottom: 2rem;
         }
-        /* FORZAR color del título y etiquetas a blanco */
+        /* Color del título y etiquetas a blanco */
         h1, .stSelectbox label {
             color: white !important;
         }
-        /* FORZAR estilo para el botón Buscar */
+        /* Estilo para el botón Buscar */
         .stButton button {
-            background-color: #eb3c46;
-            color: white !important; /* <-- Cambio aquí */
+            background-color: red !important; /* FONDO ROJO */
+            color: white !important; /* LETRAS BLANCAS */
             border-radius: 5px;
             border: none;
         }
         .stButton button:hover {
-            background-color: #d4363f;
-            color: white !important; /* <-- Cambio aquí */
+            background-color: #d4363f !important;
+            color: white !important;
             border: none;
         }
         .stButton button:disabled {
