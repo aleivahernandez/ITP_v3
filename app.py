@@ -62,13 +62,14 @@ with stylable_container(
             padding: 2rem;
             margin-bottom: 2rem;
         }
+        /* Color del título y etiquetas de filtros */
         h1, .stSelectbox label {
             color: white;
         }
         /* Estilo para el botón Buscar */
         .stButton button {
             background-color: #eb3c46;
-            color: white;
+            color: white; /* Color del texto del botón */
             border-radius: 5px;
             border: none;
         }
@@ -129,11 +130,9 @@ if 'buscar' in locals() and buscar:
 
         # 2. Lógica para ordenar por disponibilidad de imagen
         if not resultados.empty:
-            # Se crea una columna temporal para saber si la imagen existe
             resultados['tiene_imagen'] = resultados['Publication Number'].apply(
                 lambda pub_num: os.path.exists(os.path.join('images', f"{pub_num}.png"))
             )
-            # Se ordena por esa columna (True primero) y luego se elimina
             resultados = resultados.sort_values(by='tiene_imagen', ascending=False).drop(columns=['tiene_imagen'])
 
         st.markdown("---")
@@ -158,10 +157,8 @@ if 'buscar' in locals() and buscar:
                     with col_img:
                         ruta_imagen = os.path.join('images', f"{row['Publication Number']}.png")
                         if os.path.exists(ruta_imagen):
-                            # --- LÍNEA MODIFICADA ---
                             st.image(Image.open(ruta_imagen), use_container_width=True)
                         else:
-                            # --- LÍNEA MODIFICADA ---
                             st.image(os.path.join('images', 'no image.png'), use_container_width=True)
 
                     with col_info:
