@@ -10,6 +10,19 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- ESTILO GLOBAL PARA EL BORDE DE LA PÁGINA ---
+st.markdown("""
+<style>
+    /* Aplica un borde al contenedor principal de la aplicación */
+    .stApp {
+        border: 5px solid #0f69b4; /* Grosor y color del borde */
+        border-radius: 15px; /* Bordes redondeados */
+        padding: 1rem; /* Espacio entre el borde y el contenido */
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
 # --- Datos para los filtros ---
 datos_filtros = {
     "Coquimbo": {
